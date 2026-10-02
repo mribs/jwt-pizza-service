@@ -2,6 +2,7 @@ const request = require("supertest");
 const app = require("../service");
 
 const testUser = { name: "pizza diner", email: "reg@test.com", password: "a" };
+
 let testUserAuthToken;
 
 beforeAll(async () => {
@@ -19,6 +20,15 @@ test("login", async () => {
   const expectedUser = { ...testUser, roles: [{ role: "diner" }] };
   delete expectedUser.password;
   expect(loginRes.body.user).toMatchObject(expectedUser);
+});
+
+test("logout", async () => {
+  const logoutRes = await request(app)
+    .delete("/api/auth")
+    .set("Authorization", `Bearer ${testUserAuthToken}`);
+
+  expect(logoutRes.status).toBe(200);
+  expect(logoutRes.body).toEqual({ message: "logout successful" });
 });
 
 function expectValidJwt(potentialJwt) {
