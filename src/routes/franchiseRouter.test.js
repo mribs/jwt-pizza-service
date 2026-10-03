@@ -8,6 +8,12 @@ function randomName() {
   return Math.random().toString(36).substring(2, 12);
 }
 
+function expectValidJwt(potentialJwt) {
+  expect(potentialJwt).toMatch(
+    /^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/,
+  );
+}
+
 let testUserAuthToken;
 let adminUser;
 let adminUserAuthToken;
@@ -35,7 +41,7 @@ beforeAll(async () => {
   // Log in with the admin user to get the JWT
   const adminUserRes = await request(app).put("/api/auth").send(adminUser);
   adminUserAuthToken = adminUserRes.body.token;
-  adminUserId = adminUserRes.body.id;
+  adminUserId = adminUserRes.body.user.id;
   expectValidJwt(adminUserAuthToken);
 });
 
@@ -150,9 +156,3 @@ test("getUserFranchises", async () => {
   expect(getRes.status).toBe(200);
   expect(Array.isArray(getRes.body)).toBe(true);
 });
-
-function expectValidJwt(potentialJwt) {
-  expect(potentialJwt).toMatch(
-    /^[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*\.[a-zA-Z0-9\-_]*$/,
-  );
-}
