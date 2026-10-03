@@ -66,7 +66,7 @@ afterEach(() => {
 });
 
 test("addMenuItem", async () => {
-  testMenuItem = {
+  const testMenuItem = {
     title: `Test Pizza ${randomName()}`,
     description: "Pizza for testy people",
     image: "pizza.png",
