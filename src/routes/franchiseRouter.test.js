@@ -144,7 +144,7 @@ describe("Franchise and Store CRUD operations", () => {
 //   get userFranchise
 test("getUserFranchises", async () => {
   const getRes = await request(app)
-    .get(`/api/franchise/${adminUser.id}`)
+    .get(`/api/franchise/${adminUserId}`)
     .set("Authorization", `Bearer ${adminUserAuthToken}`);
 
   expect(getRes.status).toBe(200);
