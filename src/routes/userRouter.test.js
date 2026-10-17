@@ -61,40 +61,21 @@ test("getUser", async () => {
   expect(res.body).not.toHaveProperty("password");
 });
 
-// FIXME: currently runs test with admin user because updateUser requires an admin userId in order to change it
 test("updateUser", async () => {
   const updatedData = {
     email: `${randomName()}@updated.com`,
     password: "newsecretpassword123",
   };
-  console.log(`adminId: ${adminUserId}`);
   const res = await request(app)
-    .put(`/api/user/${adminUserId}`)
-    .set("Authorization", `Bearer ${adminUserAuthToken}`)
+    .put(`/api/user/${testUserId}`)
+    .set("Authorization", `Bearer ${testUserAuthToken}`)
     .send(updatedData);
 
   expect(res.status).toBe(200);
 
   // Update local reference so subsequent tests know the current email
-  adminUser.email = updatedData.email;
-  adminUser.password = updatedData.password;
-});
-
-test("listUsers", async () => {
-  const res = await request(app)
-    .get("/api/user")
-    .set("Authorization", `Bearer ${adminUserAuthToken}`);
-
-  expect(res.status).toBe(200);
-
-  // Depending on pagination structure, res.body is either an array or { users: [...] }
-  const users = Array.isArray(res.body) ? res.body : res.body.users;
-  expect(Array.isArray(users)).toBe(true);
-  if (users.length == 0) {
-    expect(res.body.message).toBe("not implemented");
-  } else {
-    expect(users.length).toBeGreaterThan(0);
-  }
+  testUser.email = updatedData.email;
+  testUser.password = updatedData.password;
 });
 
 test("deleteUser", async () => {
@@ -113,3 +94,62 @@ test("deleteUser", async () => {
 
   expect([404, 500]).toContain(getRes.status);
 });
+
+test("list users unauthorized", async () => {
+  const listUsersRes = await request(app).get("/api/user");
+  expect(listUsersRes.status).toBe(401);
+});
+
+test("list users", async () => {
+  await registerUser(request(app));
+  const listUsersRes = await request(app)
+    .get("/api/user")
+    .set("Authorization", "Bearer " + adminUserAuthToken);
+  expect(listUsersRes.status).toBe(200);
+});
+
+test("list users with pagination", async () => {
+  const res = await request(app)
+    .get("/api/user?page=1&limit=2")
+    .set("Authorization", `Bearer ${adminUserAuthToken}`);
+
+  expect(res.status).toBe(200);
+  const users = Array.isArray(res.body) ? res.body : res.body.users;
+  expect(Array.isArray(users)).toBe(true);
+  expect(users.length).toBeLessThanOrEqual(2);
+});
+
+test("list users with name filter", async () => {
+  // Using the testUser created in beforeAll
+  const res = await request(app)
+    .get(`/api/user?name=${encodeURIComponent(testUser.name)}`)
+    .set("Authorization", `Bearer ${adminUserAuthToken}`);
+
+  expect(res.status).toBe(200);
+  const users = Array.isArray(res.body) ? res.body : res.body.users;
+  expect(Array.isArray(users)).toBe(true);
+
+  // All returned users should match the name filter
+  const matches = users.filter((u) => u.name.includes(testUser.name));
+  expect(matches.length).toBeGreaterThan(0);
+});
+
+test("list users requires admin role", async () => {
+  const res = await request(app)
+    .get("/api/user")
+    .set("Authorization", `Bearer ${testUserAuthToken}`); // Regular diner token
+
+  expect(res.status).toBe(403);
+});
+
+async function registerUser(service) {
+  const testUser = {
+    name: "pizza diner",
+    email: `${randomName()}@test.com`,
+    password: "a",
+  };
+  const registerRes = await service.post("/api/auth").send(testUser);
+  registerRes.body.user.password = testUser.password;
+
+  return [registerRes.body.user, registerRes.body.token];
+}
