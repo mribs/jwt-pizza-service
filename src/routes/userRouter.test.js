@@ -18,7 +18,7 @@ let testUserAuthToken;
 let testUserId;
 let adminUser;
 let adminUserAuthToken;
-let adminUserId;
+// let adminUserId;
 
 async function createAdminUser() {
   let user = { password: "toomanysecrets", roles: [{ role: Role.Admin }] };
@@ -43,7 +43,7 @@ beforeAll(async () => {
   // Log in with the admin user to get the JWT
   const adminUserRes = await request(app).put("/api/auth").send(adminUser);
   adminUserAuthToken = adminUserRes.body.token;
-  adminUserId = adminUserRes.body.user.id;
+  // adminUserId = adminUserRes.body.user.id;
   expectValidJwt(adminUserAuthToken);
 });
 
