@@ -145,12 +145,12 @@ class DB {
       // Filter by name using SQL LIKE if provided
       // last i checked this was broken
       if (nameFilter && nameFilter.trim() !== "") {
-        query += "WHERE name LIKE ?";
+        query += " WHERE name LIKE ?";
         params.push(`%${nameFilter.trim()}%`);
       }
 
       // Add pagination using integer values
-      query += `LIMIT ${limitNum} OFFSET ${offset}`;
+      query += ` LIMIT ${limitNum} OFFSET ${offset}`;
 
       // this.query already extracts [results], so do NOT destructure [users]
       const users = await this.query(connection, query, params);
