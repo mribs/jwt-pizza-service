@@ -274,9 +274,9 @@ class Metrics {
   }
 
   sendMetricToGrafana(metrics) {
-    const metricsConfig = config.metrics || config;
-    const url = metricsConfig.url || metricsConfig.endpointUrl;
-    const userId = metricsConfig.userId || metricsConfig.accountId;
+    const metricsConfig = config.metrics;
+    const url = metricsConfig.endpointUrl;
+    const userId = metricsConfig.accountId;
     const apiKey = metricsConfig.apiKey;
 
     if (!url || !apiKey) return;
@@ -296,9 +296,18 @@ class Metrics {
         Authorization: `Bearer ${userId}:${apiKey}`,
         "Content-Type": "application/json",
       },
-    }).catch((err) => {
-      console.error("Error pushing metrics:", err.message);
-    });
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const errText = await res.text();
+          console.error(`Grafana push rejected [${res.status}]:`, errText);
+        } else {
+          console.log("Metrics successfully pushed to Grafana");
+        }
+      })
+      .catch((err) => {
+        console.error("Network error pushing metrics:", err.message);
+      });
   }
 }
 
