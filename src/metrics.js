@@ -113,7 +113,7 @@ class Metrics {
     );
     for (const [method, count] of Object.entries(this.methodRequests)) {
       metrics.push(
-        this.createMetric("request_method", count, "1", "sum", "asInt", {
+        this.createMetric(`${method}_request`, count, "1", "sum", "asInt", {
           method: method.toLowerCase(),
         }),
       );
@@ -301,9 +301,9 @@ class Metrics {
         if (!res.ok) {
           const errText = await res.text();
           console.error(`Grafana push rejected [${res.status}]:`, errText);
-        } else {
-          console.log("Metrics successfully pushed to Grafana");
-        }
+        } // else {
+        //   console.log("Metrics successfully pushed to Grafana");
+        // }
       })
       .catch((err) => {
         console.error("Network error pushing metrics:", err.message);
