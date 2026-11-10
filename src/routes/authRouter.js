@@ -5,6 +5,7 @@ const { asyncHandler } = require("../endpointHelper.js");
 const { DB, Role } = require("../database/database.js");
 
 const authRouter = express.Router();
+const metrics = require("../metrics");
 
 authRouter.docs = [
   {
@@ -101,6 +102,13 @@ authRouter.put(
     // password authentication happens in DB.getUser()
     const user = await DB.getUser(email, password);
     const auth = await setAuth(user);
+
+    if (user) {
+      metrics.trackAuth(true);
+      metrics.trackUserLogin(user.id);
+    } else {
+      metrics.trackAuth(false);
+    }
     res.json({ user: user, token: auth });
   }),
 );
@@ -111,6 +119,7 @@ authRouter.delete(
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     await clearAuth(req);
+    // metrics.trackUserLogout(req.user.id);
     res.json({ message: "logout successful" });
   }),
 );
