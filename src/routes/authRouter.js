@@ -89,6 +89,12 @@ authRouter.post(
       password,
       roles: [{ role: Role.Diner }],
     });
+    if (user) {
+      metrics.trackAuth(true);
+      metrics.trackUserLogin(user.id);
+    } else {
+      metrics.trackAuth(false);
+    }
     const auth = await setAuth(user);
     res.json({ user: user, token: auth });
   }),
@@ -119,7 +125,7 @@ authRouter.delete(
   authRouter.authenticateToken,
   asyncHandler(async (req, res) => {
     await clearAuth(req);
-    // metrics.trackUserLogout(req.user.id);
+    metrics.trackUserLogout(req.user.id);
     res.json({ message: "logout successful" });
   }),
 );
