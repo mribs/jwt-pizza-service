@@ -301,9 +301,7 @@ class Metrics {
         if (!res.ok) {
           const errText = await res.text();
           console.error(`Grafana push rejected [${res.status}]:`, errText);
-        } // else {
-        //   console.log("Metrics successfully pushed to Grafana");
-        // }
+        }
       })
       .catch((err) => {
         console.error("Network error pushing metrics:", err.message);
