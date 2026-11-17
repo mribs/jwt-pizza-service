@@ -7,10 +7,15 @@ const version = require("./version.json");
 const config = require("./config.js");
 
 const metrics = require("./metrics.js");
+const Logger = require("pizza-logger");
+const logger = new Logger(config);
 
 const app = express();
 // metrics (D8)
 app.use(metrics.requestTracker);
+
+// logger (D9)
+app.use(logger.httpLogger);
 
 app.use(express.json());
 
